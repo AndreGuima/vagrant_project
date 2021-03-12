@@ -2,17 +2,14 @@ $script_mysql = <<-SCRIPT
   apt-get update && \
   apt-get install -y mysql-server-5.7 && \
   mysql -e "create user 'phpuser'@'%' identified by 'pass';"
-  cat /configs/mysqld.cnf > /etc/mysql/mysql.conf.d/mysqld.cnf
   service mysql restart
 SCRIPT
 
 $script_puppet = <<-SCRIPT
-  apt-get update && \
-  apt-get install -y puppet
+  apt-get update && apt-get install -y puppet
 SCRIPT
 
 Vagrant.configure("2") do |config|
-
   config.vm.box = "ubuntu/bionic64"
 
   config.vm.define "mysqldb" do |mysql|
@@ -22,6 +19,7 @@ Vagrant.configure("2") do |config|
     mysql.vm.synced_folder ".", "/vagrant", disabled: true
 
     mysql.vm.provision "shell", inline: "cat /configs/private_public_keys.pub >> .ssh/authorized_keys"
+    mysql.vm.provision "shell", inline: "cat /configs/mysqld.cnf > /etc/mysql/mysql.conf.d/mysqld.cnf"
     mysql.vm.provision "shell", inline: $script_mysql
   end
 
@@ -35,5 +33,26 @@ Vagrant.configure("2") do |config|
       puppet.manifests_path = "./configs/manifests"
       puppet.manifest_file = "phpweb.pp"
     end
+  end
+
+  config.vm.define "mysqlserver" do |mysqlserver|
+    mysqlserver.vm.network "public_network", ip: "192.168.15.14"
+
+    mysqlserver.vm.provision "shell",
+      inline: "cat /vagrant/configs/private_public_keys.pub >> .ssh/authorized_keys"
+  end
+
+  config.vm.define "ansible" do |ansible|
+    ansible.vm.network "public_network", ip: "192.168.15.15"
+
+    ansible.vm.provision "shell",
+      inline: "cp /vagrant/private_public_keys /home/vagrant && \
+               chmod 600 /home/vagrant/private_public_keys"
+
+    ansible.vm.provision "shell",
+      inline: "apt update && \
+               apt install -y software-properties-common && \
+               apt-add-repository --yes --update ppa:ansible/ansible && \
+               apt install -y ansible"
   end
 end

@@ -1,1 +1,2 @@
 git rm --cached private_public_keys
+git rm --cached /configs/private_public_keys.pub

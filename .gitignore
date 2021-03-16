@@ -1,2 +1,4 @@
-git rm --cached private_public_keys
-git rm --cached /configs/private_public_keys.pub
+id_bionic
+/configs/id_bionic.pub
+.vagrant/
+ubuntu-bionic-18.04-cloudimg-console.log

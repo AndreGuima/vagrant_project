@@ -36,16 +36,16 @@ Vagrant.configure("2") do |config|
     mysqlserver.vm.network "public_network", ip: "192.168.15.14"
 
     mysqlserver.vm.provision "shell",
-      inline: "cat /vagrant/configs/private_public_keys.pub >> .ssh/authorized_keys"
+      inline: "cat /vagrant/configs/id_bionic.pub >> .ssh/authorized_keys"
   end
 
   config.vm.define "ansible" do |ansible|
     ansible.vm.network "public_network", ip: "192.168.15.15"
 
     ansible.vm.provision "shell",
-      inline: "cp /vagrant/private_public_keys /home/vagrant && \
-               chmod 600 /home/vagrant/private_public_keys && \
-               chown vagrant:vagrant /home/vagrant/private_public_keys"
+      inline: "cp /vagrant/id_bionic /home/vagrant && \
+               chmod 600 /home/vagrant/id_bionic && \
+               chown vagrant:vagrant /home/vagrant/id_bionic"
 
     ansible.vm.provision "shell",
       inline: "apt update && \
